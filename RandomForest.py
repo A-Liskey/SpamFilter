@@ -1,21 +1,22 @@
 import numpy as np
 import matplotlib.pyplot as pl
-from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import roc_auc_score
 
 def aucCV(features,labels):
-    model = LogisticRegression()
+    model = RandomForestClassifier()
     scores = cross_val_score(model, features, labels, cv=10,scoring='roc_auc')
     
     return scores
 
 def predictTest(trainFeatures,trainLabels,testFeatures):
-    model = LogisticRegression()
+    model = RandomForestClassifier()
     model.fit(trainFeatures,trainLabels)
     
     # Use predict_proba() rather than predict() to use probabilities rather
     # than estimated class labels as outputs
+    
     testOutputs = model.predict_proba(testFeatures)[:,1]
     
     return testOutputs
