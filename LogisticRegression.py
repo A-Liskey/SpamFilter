@@ -1,17 +1,32 @@
 import numpy as np
+import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as pl
+from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import roc_auc_score
 
 def aucCV(features,labels):
     model = LogisticRegression()
+    
+    # #scale features
+    # scale=StandardScaler()
+    # trainFeatures = scale.fit_transform(trainFeatures)
+    # testFeatures = scale.transform(testFeatures)
+    
     scores = cross_val_score(model, features, labels, cv=10,scoring='roc_auc')
     
     return scores
 
 def predictTest(trainFeatures,trainLabels,testFeatures):
     model = LogisticRegression()
+    
+    #scale features
+    scale=StandardScaler()
+    trainFeatures = scale.fit_transform(trainFeatures)
+    testFeatures = scale.transform(testFeatures, copy=False)
+    
     model.fit(trainFeatures,trainLabels)
     
     # Use predict_proba() rather than predict() to use probabilities rather
@@ -30,6 +45,11 @@ if __name__ == "__main__":
     features = data[:,:-1]
     labels = data[:,-1]
     
+    #display heatmap
+    df = pd.DataFrame(data)
+    heatmap = sns.heatmap(df.corr(), annot=False, linewidths=0)
+    pl.show()
+    
     # Evaluating classifier accuracy using 10-fold cross-validation
     print("10-fold cross-validation mean AUC: ",
           np.mean(aucCV(features,labels)))
@@ -40,8 +60,11 @@ if __name__ == "__main__":
     trainLabels = labels[0::2]
     testFeatures = features[1::2,:]
     testLabels = labels[1::2]
+    
     testOutputs = predictTest(trainFeatures,trainLabels,testFeatures)
     print("Test set AUC: ", roc_auc_score(testLabels,testOutputs))
+    
+
     
     # Examine outputs compared to labels
     sortIndex = np.argsort(testLabels)

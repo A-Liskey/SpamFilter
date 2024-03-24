@@ -1,35 +1,33 @@
+# -*- coding: utf-8 -*-
+"""
+Demo of 10-fold cross-validation using Gaussian naive Bayes on spam data
+
+@author: FJS
+"""
+
 import numpy as np
 import matplotlib.pyplot as pl
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler
+from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import roc_auc_score
 
-model = RandomForestClassifier(bootstrap= True,
-                               max_depth = 100,
-                               min_samples_leaf = 5,
-                               min_samples_split = 10,
-                               n_estimators = 400,
-                               n_jobs= 4,
-                               random_state=96)
-
 def aucCV(features,labels):
-    # model = RandomForestClassifier()
+    model = GaussianNB()
     scores = cross_val_score(model, features, labels, cv=10,scoring='roc_auc')
     
     return scores
 
 def predictTest(trainFeatures,trainLabels,testFeatures):
-    
+    model = GaussianNB()
     model.fit(trainFeatures,trainLabels)
     
     # Use predict_proba() rather than predict() to use probabilities rather
     # than estimated class labels as outputs
-    
     testOutputs = model.predict_proba(testFeatures)[:,1]
     
     return testOutputs
-
+    
+# Run this code only if being used as a script, not being imported
 if __name__ == "__main__":
     data = np.loadtxt('spam1.csv',delimiter=',')
     # Randomly shuffle rows of data set then separate labels (last column)
@@ -37,7 +35,7 @@ if __name__ == "__main__":
     np.random.shuffle(shuffleIndex)
     data = data[shuffleIndex,:]
     features = data[:,:-1]
-    labels = data[:,-1]    
+    labels = data[:,-1]
     
     # Evaluating classifier accuracy using 10-fold cross-validation
     print("10-fold cross-validation mean AUC: ",
