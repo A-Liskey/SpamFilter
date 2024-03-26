@@ -3,6 +3,7 @@ import matplotlib.pyplot as pl
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import roc_auc_score
+from sklearn.feature_selection import SelectKBest, f_classif
 
 def aucCV(features,labels):
     model = RandomForestClassifier()
@@ -12,7 +13,15 @@ def aucCV(features,labels):
 
 def predictTest(trainFeatures,trainLabels,testFeatures):
     model = RandomForestClassifier()
+    
+    #add column headers to train and test features
+    
+    #Scale data and perform feature selection on train data
+    trainFeatures = SelectKBest(f_classif, k=10).fit_transform(trainFeatures, trainLabels)
     model.fit(trainFeatures,trainLabels)
+
+    #select same features in test data that were chosen from feature selection by matching headers
+    
     
     # Use predict_proba() rather than predict() to use probabilities rather
     # than estimated class labels as outputs

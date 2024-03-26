@@ -1,27 +1,35 @@
+# -*- coding: utf-8 -*-
+"""
+Demo of 10-fold cross-validation using Gaussian naive Bayes on spam data
+
+@author: FJS
+"""
+
 import numpy as np
+import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as pl
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
+from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import roc_auc_score
 
 def aucCV(features,labels):
-    model = LogisticRegression()
+    model = GaussianNB()
     scores = cross_val_score(model, features, labels, cv=10,scoring='roc_auc')
     
     return scores
 
 def predictTest(trainFeatures,trainLabels,testFeatures):
-    model = LogisticRegression()
+    model = GaussianNB()
     model.fit(trainFeatures,trainLabels)
     
     # Use predict_proba() rather than predict() to use probabilities rather
     # than estimated class labels as outputs
-    
     testOutputs = model.predict_proba(testFeatures)[:,1]
     
     return testOutputs
-
+    
+# Run this code only if being used as a script, not being imported
 if __name__ == "__main__":
     data = np.loadtxt('spam1.csv',delimiter=',')
     # Randomly shuffle rows of data set then separate labels (last column)
@@ -30,6 +38,11 @@ if __name__ == "__main__":
     data = data[shuffleIndex,:]
     features = data[:,:-1]
     labels = data[:,-1]
+    
+    #show heatmap
+    df = pd.DataFrame(data)
+    sns.heatmap(df.corr())
+    pl.show()
     
     # Evaluating classifier accuracy using 10-fold cross-validation
     print("10-fold cross-validation mean AUC: ",
@@ -41,11 +54,6 @@ if __name__ == "__main__":
     trainLabels = labels[0::2]
     testFeatures = features[1::2,:]
     testLabels = labels[1::2]
-    
-    #scale dataset
-    # trainFeatures = StandardScaler.fit_transform(trainFeatures, trainLabels)
-    
-    
     testOutputs = predictTest(trainFeatures,trainLabels,testFeatures)
     print("Test set AUC: ", roc_auc_score(testLabels,testOutputs))
     
@@ -60,3 +68,4 @@ if __name__ == "__main__":
     pl.plot(np.arange(nTestExamples),testOutputs[sortIndex],'r.')
     pl.xlabel('Sorted example number')
     pl.ylabel('Output (predicted target)')
+    
